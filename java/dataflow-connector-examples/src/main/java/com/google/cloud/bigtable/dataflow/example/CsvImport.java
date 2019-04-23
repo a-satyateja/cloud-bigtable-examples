@@ -60,7 +60,8 @@ import org.slf4j.LoggerFactory;
  */
 public class CsvImport {
 
-  private static final byte[] FAMILY = Bytes.toBytes("csv");
+  private static final byte[] FAMILY_1 = Bytes.toBytes("fam1");
+  private static final byte[] FAMILY_2 = Bytes.toBytes("fam2");
   private static final Logger LOG = LoggerFactory.getLogger(CsvImport.class);
 
   static final DoFn<String, Mutation> MUTATION_TRANSFORM = new DoFn<String, Mutation>() {
@@ -72,6 +73,7 @@ public class CsvImport {
         String[] values = c.element().split(",");
         Preconditions.checkArgument(headers.length == values.length);
 
+        // byte[] rowkey = Bytes.toBytes(values[0].toString() + values[1].toString());
         byte[] rowkey = Bytes.toBytes(values[0]);
         byte[][] headerBytes = new byte[headers.length][];
         for (int i = 0; i < headers.length; i++) {
@@ -81,7 +83,11 @@ public class CsvImport {
         Put row = new Put(rowkey);
         long timestamp = System.currentTimeMillis();
         for (int i = 1; i < values.length; i++) {
-          row.addColumn(FAMILY, headerBytes[i], timestamp, Bytes.toBytes(values[i]));
+          if(i == 1) {
+            row.addColumn(FAMILY_1, headerBytes[i], timestamp, Bytes.toBytes(values[i]));
+          } else if(i == 2) {
+            row.addColumn(FAMILY_2, headerBytes[i], timestamp, Bytes.toBytes(values[i]));
+          }
         }
         c.output(row);
       } catch (Exception e) {
