@@ -64,9 +64,18 @@ public class CsvImport {
   private static final byte[] FAMILY_2 = Bytes.toBytes("fam2");
   private static final Logger LOG = LoggerFactory.getLogger(CsvImport.class);
 
-  static final DoFn<String, Mutation> MUTATION_TRANSFORM = new DoFn<String, Mutation>() {
+  static class ComputeWordLengthFn extends DoFn<String, Integer> {
+  @ProcessElement
+  public void processElement(@Element String word, OutputReceiver<Integer> out) {
+    // Use OutputReceiver.output to emit the output element.
+    out.output(word.length());
+  }
+}
+  static class MUTATION_TRANSFORM extends DoFn<String, Mutation> {
+  // static final DoFn<String, Mutation> MUTATION_TRANSFORM = new DoFn<String, Mutation>() {
     @ProcessElement
-    public void processElement(DoFn<String, Mutation>.ProcessContext c) throws Exception {
+    public void processElement(@Element String line, OutputReceiver<Mutation> out, ProcessContext c) throws Exception {
+    // public void processElement(DoFn<String, Mutation>.ProcessContext c) throws Exception {
       try {
         String[] headers = c.getPipelineOptions().as(BigtableCsvOptions.class).getHeaders()
             .split(",");
@@ -89,7 +98,7 @@ public class CsvImport {
             row.addColumn(FAMILY_2, headerBytes[i], timestamp, Bytes.toBytes(values[i]));
           }
         }
-        c.output(row);
+        out.output(row);
       } catch (Exception e) {
         LOG.error("Failed to process input {}", c.element(), e);
         throw e;
