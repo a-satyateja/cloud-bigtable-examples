@@ -64,9 +64,18 @@ public class CsvImport {
   private static final byte[] FAMILY_2 = Bytes.toBytes("fam2");
   private static final Logger LOG = LoggerFactory.getLogger(CsvImport.class);
 
+  // static class ComputeWordLengthFn extends DoFn<String, Integer> {
+  //   @ProcessElement
+  //   public void processElement(@Element String word, OutputReceiver<Integer> out) {
+  //     // Use OutputReceiver.output to emit the output element.
+  //     out.output(word.length());
+  //   }
+  // }
+
   static final DoFn<String, Mutation> MUTATION_TRANSFORM = new DoFn<String, Mutation>() {
     @ProcessElement
     public void processElement(DoFn<String, Mutation>.ProcessContext c) throws Exception {
+      // @Element String word, OutputReceiver<Integer> out
       try {
         String[] headers = c.getPipelineOptions().as(BigtableCsvOptions.class).getHeaders()
             .split(",");
