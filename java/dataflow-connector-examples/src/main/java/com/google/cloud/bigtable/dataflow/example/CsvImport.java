@@ -64,13 +64,13 @@ public class CsvImport {
   private static final byte[] FAMILY_2 = Bytes.toBytes("fam2");
   private static final Logger LOG = LoggerFactory.getLogger(CsvImport.class);
 
-  static class ComputeWordLengthFn extends DoFn<String, Integer> {
-  @ProcessElement
-  public void processElement(@Element String word, OutputReceiver<Integer> out) {
-    // Use OutputReceiver.output to emit the output element.
-    out.output(word.length());
-  }
-}
+//   static class ComputeWordLengthFn extends DoFn<String, Integer> {
+//   @ProcessElement
+//   public void processElement(@Element String word, OutputReceiver<Integer> out) {
+//     // Use OutputReceiver.output to emit the output element.
+//     out.output(word.length());
+//   }
+// }
   static class MUTATION_TRANSFORM extends DoFn<String, Mutation> {
   // static final DoFn<String, Mutation> MUTATION_TRANSFORM = new DoFn<String, Mutation>() {
     @ProcessElement
