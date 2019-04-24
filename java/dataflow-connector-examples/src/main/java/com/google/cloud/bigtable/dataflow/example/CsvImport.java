@@ -160,7 +160,7 @@ public class CsvImport {
     Pipeline p = Pipeline.create(options);
 
     p.apply("ReadMyFile", TextIO.read().from(options.getInputFile()))
-        .apply("TransformParsingsToBigtable", ParDo.of(MUTATION_TRANSFORM))
+        .apply("TransformParsingsToBigtable", ParDo.of(new MUTATION_TRANSFORM()))
         .apply("WriteToBigtable", CloudBigtableIO.writeToTable(config));
 
     p.run().waitUntilFinish();
