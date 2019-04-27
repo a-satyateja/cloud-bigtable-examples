@@ -79,7 +79,8 @@ public class CsvImport {
       try {
         String[] headers = c.getPipelineOptions().as(BigtableCsvOptions.class).getHeaders()
             .split(",");
-        String[] values = c.element().split(",");
+        // String[] values = c.element().split(",");
+        String[] values = line.split(",");
         Preconditions.checkArgument(headers.length == values.length);
 
         // byte[] rowkey = Bytes.toBytes(values[0].toString() + values[1].toString());
@@ -110,14 +111,16 @@ public class CsvImport {
   public static interface BigtableCsvOptions extends CloudBigtableOptions {
 
     @Description("The headers for the CSV file.")
-    String getHeaders();
+    // String getHeaders();
+    ValueProvider<String> getHeaders();
 
-    void setHeaders(String headers);
+    void setHeaders(ValueProvider<String> headers);
 
     @Description("The Cloud Storage path to the CSV file.")
-    String getInputFile();
+    // String getInputFile();
+    ValueProvider<String> getInputFile();
 
-    void setInputFile(String location);
+    void setInputFile(ValueProvider<String> location);
   }
 
 
@@ -159,9 +162,9 @@ public class CsvImport {
 
     Pipeline p = Pipeline.create(options);
 
-    p.apply("ReadMyFile", TextIO.read().from(options.getInputFile()))
+    p.apply("ReadMyFile", TextIO.read().from(options.getInputFile()).withoutValidation())
         .apply("TransformParsingsToBigtable", ParDo.of(new MUTATION_TRANSFORM()))
-        .apply("WriteToBigtable", CloudBigtableIO.writeToTable(config));
+        .apply("WriteToBigtable", CloudBigtableIO.writeToTable(config).withoutValidation());
 
     p.run().waitUntilFinish();
   }
