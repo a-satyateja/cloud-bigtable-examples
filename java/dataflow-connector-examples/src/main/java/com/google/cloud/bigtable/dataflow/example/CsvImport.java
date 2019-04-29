@@ -108,7 +108,7 @@ public class CsvImport {
     }
   }
 
-  public static PipelineResult run(Options options) {
+  public static PipelineResult run(CloudBigtableOptions options) {
     Pipeline pipeline = Pipeline.create(options);
 
     BigtableIO.Write write =
