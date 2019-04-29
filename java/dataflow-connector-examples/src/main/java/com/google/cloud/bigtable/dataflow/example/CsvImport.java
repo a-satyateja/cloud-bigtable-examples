@@ -71,15 +71,16 @@ public class CsvImport {
   //     out.output(word.length());
   //   }
   // }
-
-  static final DoFn<String, Mutation> MUTATION_TRANSFORM = new DoFn<String, Mutation>() {
+// static class ComputeWordLengthFn extends DoFn<String, Integer>
+  static class MUTATION_TRANSFORM extends DoFn<String, Mutation> {
     @ProcessElement
-    public void processElement(DoFn<String, Mutation>.ProcessContext c) throws Exception {
+    public void processElement(@Element String word, OutputReceiver<Mutation> out, ProcessContext c) throws Exception {
       // @Element String word, OutputReceiver<Integer> out
       try {
         String[] headers = c.getPipelineOptions().as(BigtableCsvOptions.class).getHeaders()
             .split(",");
-        String[] values = c.element().split(",");
+        String[] values = word.split(",");
+        // String[] values = c.element().split(",");
         Preconditions.checkArgument(headers.length == values.length);
 
         // byte[] rowkey = Bytes.toBytes(values[0].toString() + values[1].toString());
@@ -98,7 +99,7 @@ public class CsvImport {
             row.addColumn(FAMILY_2, headerBytes[i], timestamp, Bytes.toBytes(values[i]));
           }
         }
-        c.output(row);
+        out.output(row);
       } catch (Exception e) {
         LOG.error("Failed to process input {}", c.element(), e);
         throw e;
