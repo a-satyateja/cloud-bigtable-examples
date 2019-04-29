@@ -149,8 +149,10 @@ public class CsvImport {
     @ProcessElement
     public void processElement(@Element String word, OutputReceiver<Mutation> out, ProcessContext c) throws Exception {
       try {
-        String[] headers = c.getPipelineOptions().as(CloudBigtableOptions.class).getHeaders().get()
-            .split(",");
+        String headers1 = "rowkey,key1,key2";
+        String[] headers = headers1.split(",");
+        // String[] headers = c.getPipelineOptions().as(CloudBigtableOptions.class).getHeaders().get()
+        //     .split(",");
         String[] values = word.split(",");
         Preconditions.checkArgument(headers.length == values.length);
 
