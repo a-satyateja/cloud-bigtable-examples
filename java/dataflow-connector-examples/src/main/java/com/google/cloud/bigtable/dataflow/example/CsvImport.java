@@ -29,7 +29,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.beam.sdk.io.TextIO;
 
-import com.google.cloud.bigtable.beam.CloudBigtableIO;
+import org.apache.beam.sdk.io.gcp.bigtable.BigtableIO;
 import com.google.cloud.bigtable.beam.CloudBigtableTableConfiguration;
 
 import org.slf4j.Logger;
@@ -63,6 +63,10 @@ import org.slf4j.LoggerFactory;
  */
 public class CsvImport {
 
+
+  private static final byte[] FAMILY_1 = Bytes.toBytes("fam1");
+  private static final byte[] FAMILY_2 = Bytes.toBytes("fam2");
+  private static final Logger LOG = LoggerFactory.getLogger(CsvImport.class);
   /** Options for the import pipeline. */
   public interface CloudBigtableOptions extends DataflowPipelineOptions {
     @Description("The Google Cloud project ID for the Cloud Bigtable instance.")
@@ -126,10 +130,6 @@ public class CsvImport {
     return pipeline.run();
   }
 
-
-  // private static final byte[] FAMILY_1 = Bytes.toBytes("fam1");
-  // private static final byte[] FAMILY_2 = Bytes.toBytes("fam2");
-  // private static final Logger LOG = LoggerFactory.getLogger(CsvImport.class);
 
   static class MUTATION_TRANSFORM extends DoFn<String, Mutation> {
     @ProcessElement
