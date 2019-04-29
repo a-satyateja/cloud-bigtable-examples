@@ -117,16 +117,29 @@ public class CsvImport {
   public static PipelineResult run(CloudBigtableOptions options) {
     Pipeline pipeline = Pipeline.create(options);
 
-    BigtableIO.Write write =
-        BigtableIO.write()
-            .withProjectId(options.getBigtableProjectId())
-            .withInstanceId(options.getBigtableInstanceId())
-            .withTableId(options.getBigtableTableId());
+    // BigtableIO.Write write =
+    //     BigtableIO.write()
+    //         .withProjectId(options.getBigtableProjectId())
+    //         .withInstanceId(options.getBigtableInstanceId())
+    //         .withTableId(options.getBigtableTableId());
 
-    pipeline
-        .apply("ReadMyFile", TextIO.read().from(options.getInputFile()))
-        .apply("TransformParsingsToBigtable", ParDo.of(new MUTATION_TRANSFORM()))
-        .apply("Write to Bigtable", write);
+    CloudBigtableTableConfiguration config = new CloudBigtableTableConfiguration.Builder()
+                                              .withProjectId(options.getBigtableProjectId())
+                                              .withInstanceId(options.getBigtableInstanceId())
+                                              .withTableId(options.getBigtableTableId())
+                                              .build();
+    
+    pipeline.apply("ReadMyFile", TextIO.read().from(options.getInputFile()))
+            .apply("TransformParsingsToBigtable", ParDo.of(new MUTATION_TRANSFORM()))
+            .apply("WriteToBigtable", CloudBigtableIO.writeToTable(config));
+
+       
+
+    // Pipeline p = Pipeline.create(options);
+
+    // p.apply("ReadMyFile", TextIO.read().from(options.getInputFile()))
+    //     .apply("TransformParsingsToBigtable", ParDo.of(MUTATION_TRANSFORM))
+    //     .apply("WriteToBigtable", CloudBigtableIO.writeToTable(config));
 
     return pipeline.run();
   }
