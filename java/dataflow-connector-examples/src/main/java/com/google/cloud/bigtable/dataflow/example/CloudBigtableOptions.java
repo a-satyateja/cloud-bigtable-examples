@@ -2,21 +2,22 @@ package com.google.cloud.bigtable.dataflow.example;
 
 import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
 import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.options.ValueProvider;
 
 public interface CloudBigtableOptions extends DataflowPipelineOptions {
   @Description("The Google Cloud project ID for the Cloud Bigtable instance.")
-  String getBigtableProjectId();
+  ValueProvider<String> getBigtableProjectId();
 
-  void setBigtableProjectId(String bigtableProjectId);
+  void setBigtableProjectId(ValueProvider<String> bigtableProjectId);
 
   @Description("The Google Cloud Bigtable instance ID .")
-  String getBigtableInstanceId();
+  ValueProvider<String> getBigtableInstanceId();
 
-  void setBigtableInstanceId(String bigtableInstanceId);
+  void setBigtableInstanceId(ValueProvider<String> bigtableInstanceId);
 
   @Description("The Cloud Bigtable table ID in the instance." )
-  String getBigtableTableId();
+  ValueProvider<String> getBigtableTableId();
 
-  void setBigtableTableId(String bigtableTableId);
+  void setBigtableTableId(ValueProvider<String> bigtableTableId);
 
 }
