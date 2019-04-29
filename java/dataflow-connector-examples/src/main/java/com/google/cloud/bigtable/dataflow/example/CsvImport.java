@@ -151,7 +151,7 @@ public class CsvImport {
       try {
         String[] headers = c.getPipelineOptions().as(CloudBigtableOptions.class).getHeaders()
             .split(",");
-        String[] values = word.split(",");
+        String[] values = word.get().split(",");
         Preconditions.checkArgument(headers.length == values.length);
 
         byte[] rowkey = Bytes.toBytes(values[0]);
