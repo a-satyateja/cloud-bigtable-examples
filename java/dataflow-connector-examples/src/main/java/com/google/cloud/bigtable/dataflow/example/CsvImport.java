@@ -99,7 +99,7 @@ public class CsvImport {
   public static void main(String[] args) throws IllegalArgumentException {
     // Options options =
     // PipelineOptionsFactory.fromArgs(args).withValidation().as(Options.class);
-    CloudBigtableOptions options = PipelineOptionsFactory.fromArgs(args).withValidation().as(BigtableCsvOptions.class);
+    CloudBigtableOptions options = PipelineOptionsFactory.fromArgs(args).withValidation().as(CloudBigtableOptions.class);
 
     PipelineResult result = run(options);
 
@@ -135,7 +135,7 @@ public class CsvImport {
     @ProcessElement
     public void processElement(@Element String word, OutputReceiver<Mutation> out, ProcessContext c) throws Exception {
       try {
-        String[] headers = c.getPipelineOptions().as(BigtableCsvOptions.class).getHeaders()
+        String[] headers = c.getPipelineOptions().as(CloudBigtableOptions.class).getHeaders()
             .split(",");
         String[] values = word.split(",");
         // String[] values = c.element().split(",");
