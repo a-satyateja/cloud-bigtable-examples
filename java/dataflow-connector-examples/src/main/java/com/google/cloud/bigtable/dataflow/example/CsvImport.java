@@ -113,14 +113,14 @@ public class CsvImport {
 
     @Description("The headers for the CSV file.")
     // String getHeaders();
-    @Validation.Required
+    // @Validation.Required
     ValueProvider<String> getHeaders();
 
     void setHeaders(ValueProvider<String> headers);
 
     @Description("The Cloud Storage path to the CSV file.")
     // String getInputFile();
-    @Validation.Required
+    // @Validation.Required
     ValueProvider<String> getInputFile();
 
     void setInputFile(ValueProvider<String> location);
