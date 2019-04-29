@@ -29,6 +29,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.beam.sdk.io.TextIO;
 
+import com.google.cloud.bigtable.beam.CloudBigtableIO;
 import org.apache.beam.sdk.io.gcp.bigtable.BigtableIO;
 import com.google.cloud.bigtable.beam.CloudBigtableTableConfiguration;
 
@@ -138,7 +139,6 @@ public class CsvImport {
         String[] headers = c.getPipelineOptions().as(CloudBigtableOptions.class).getHeaders()
             .split(",");
         String[] values = word.split(",");
-        // String[] values = c.element().split(",");
         Preconditions.checkArgument(headers.length == values.length);
 
         byte[] rowkey = Bytes.toBytes(values[0]);
@@ -164,20 +164,6 @@ public class CsvImport {
 
     }
   };
-
-  // public static interface BigtableCsvOptions extends CloudBigtableOptions {
-
-  //   @Description("The headers for the CSV file.")
-  //   String getHeaders();
-
-  //   void setHeaders(String headers);
-
-  //   @Description("The Cloud Storage path to the CSV file.")
-  //   String getInputFile();
-
-  //   void setInputFile(String location);
-  // }
-
 
   /**
    * <p>Creates a dataflow pipeline that reads a file and creates the following chain:</p>
