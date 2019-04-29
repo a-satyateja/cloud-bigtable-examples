@@ -19,6 +19,8 @@ import com.google.common.base.Preconditions;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
+import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.hadoop.hbase.client.Mutation;
@@ -60,9 +62,73 @@ import org.slf4j.LoggerFactory;
  */
 public class CsvImport {
 
-  private static final byte[] FAMILY_1 = Bytes.toBytes("fam1");
-  private static final byte[] FAMILY_2 = Bytes.toBytes("fam2");
-  private static final Logger LOG = LoggerFactory.getLogger(CsvImport.class);
+  /** Options for the import pipeline. */
+  public interface CloudBigtableOptions extends DataflowPipelineOptions {
+    @Description("The Google Cloud project ID for the Cloud Bigtable instance.")
+    ValueProvider<String> getBigtableProjectId();
+
+    void setBigtableProjectId(ValueProvider<String> bigtableProjectId);
+
+    @Description("The Google Cloud Bigtable instance ID .")
+    ValueProvider<String> getBigtableInstanceId();
+
+    void setBigtableInstanceId(ValueProvider<String> bigtableInstanceId);
+
+    @Description("The Cloud Bigtable table ID in the instance.")
+    ValueProvider<String> getBigtableTableId();
+
+    void setBigtableTableId(ValueProvider<String> bigtableTableId);
+
+    @Description("The headers for the CSV file.")
+    ValueProvider<String> getHeaders();
+
+    void setHeaders(ValueProvider<String> headers);
+
+    @Description("The Cloud Storage path to the CSV file.")
+    ValueProvider<String> getInputFile();
+
+    void setInputFile(ValueProvider<String> location);
+  }
+
+  /**
+   * Runs a pipeline to import csv files in GCS to a Cloud Bigtable table.
+   *
+   * @param args arguments to the pipeline
+   */
+  public static void main(String[] args) throws IllegalArgumentException {
+    // Options options =
+    // PipelineOptionsFactory.fromArgs(args).withValidation().as(Options.class);
+    CloudBigtableOptions options = PipelineOptionsFactory.fromArgs(args).withValidation().as(BigtableCsvOptions.class);
+
+    PipelineResult result = run(options);
+
+    // Wait for pipeline to finish only if it is not constructing a template.
+    if (options.as(DataflowPipelineOptions.class).getTemplateLocation() == null) {
+      result.waitUntilFinish();
+    }
+  }
+
+  public static PipelineResult run(Options options) {
+    Pipeline pipeline = Pipeline.create(options);
+
+    BigtableIO.Write write =
+        BigtableIO.write()
+            .withProjectId(options.getBigtableProjectId())
+            .withInstanceId(options.getBigtableInstanceId())
+            .withTableId(options.getBigtableTableId());
+
+    pipeline
+        .apply("ReadMyFile", TextIO.read().from(options.getInputFile()))
+        .apply("TransformParsingsToBigtable", ParDo.of(new MUTATION_TRANSFORM()))
+        .apply("Write to Bigtable", write);
+
+    return pipeline.run();
+  }
+
+
+  // private static final byte[] FAMILY_1 = Bytes.toBytes("fam1");
+  // private static final byte[] FAMILY_2 = Bytes.toBytes("fam2");
+  // private static final Logger LOG = LoggerFactory.getLogger(CsvImport.class);
 
   static class MUTATION_TRANSFORM extends DoFn<String, Mutation> {
     @ProcessElement
@@ -98,18 +164,18 @@ public class CsvImport {
     }
   };
 
-  public static interface BigtableCsvOptions extends CloudBigtableOptions {
+  // public static interface BigtableCsvOptions extends CloudBigtableOptions {
 
-    @Description("The headers for the CSV file.")
-    String getHeaders();
+  //   @Description("The headers for the CSV file.")
+  //   String getHeaders();
 
-    void setHeaders(String headers);
+  //   void setHeaders(String headers);
 
-    @Description("The Cloud Storage path to the CSV file.")
-    String getInputFile();
+  //   @Description("The Cloud Storage path to the CSV file.")
+  //   String getInputFile();
 
-    void setInputFile(String location);
-  }
+  //   void setInputFile(String location);
+  // }
 
 
   /**
@@ -130,30 +196,5 @@ public class CsvImport {
    * --bigtableTableId=[bigtable tableName]
    */
 
-  public static void main(String[] args) throws IllegalArgumentException {
-    BigtableCsvOptions options =
-        PipelineOptionsFactory.fromArgs(args).withValidation().as(BigtableCsvOptions.class);
-
-    if (options.getInputFile().equals("")) {
-      throw new IllegalArgumentException("Please provide value for inputFile.");
-    }
-    if (options.getHeaders().equals("")) {
-      throw new IllegalArgumentException("Please provide value for headers.");
-    }
-
-    CloudBigtableTableConfiguration config =
-        new CloudBigtableTableConfiguration.Builder()
-            .withProjectId(options.getBigtableProjectId())
-            .withInstanceId(options.getBigtableInstanceId())
-            .withTableId(options.getBigtableTableId())
-            .build();
-
-    Pipeline p = Pipeline.create(options);
-
-    p.apply("ReadMyFile", TextIO.read().from(options.getInputFile()))
-        .apply("TransformParsingsToBigtable", ParDo.of(new MUTATION_TRANSFORM()))
-        .apply("WriteToBigtable", CloudBigtableIO.writeToTable(config));
-
-    p.run().waitUntilFinish();
-  }
+  
 }
