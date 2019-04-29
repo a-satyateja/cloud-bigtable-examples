@@ -124,9 +124,9 @@ public class CsvImport {
     //         .withTableId(options.getBigtableTableId());
 
     CloudBigtableTableConfiguration config = new CloudBigtableTableConfiguration.Builder()
-                                              .withProjectId(options.getBigtableProjectId())
-                                              .withInstanceId(options.getBigtableInstanceId())
-                                              .withTableId(options.getBigtableTableId())
+                                              .withProjectId("dataninja")
+                                              .withInstanceId("dataninja-bt")
+                                              .withTableId("my-table")
                                               .build();
     
     pipeline.apply("ReadMyFile", TextIO.read().from(options.getInputFile()))
