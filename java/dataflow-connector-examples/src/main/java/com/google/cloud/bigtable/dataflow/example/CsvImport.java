@@ -25,7 +25,6 @@ import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.beam.sdk.io.TextIO;
-import org.apache.beam.sdk.options.ValueProvider;
 
 import com.google.cloud.bigtable.beam.CloudBigtableIO;
 import com.google.cloud.bigtable.beam.CloudBigtableTableConfiguration;
@@ -65,23 +64,22 @@ public class CsvImport {
   private static final byte[] FAMILY_2 = Bytes.toBytes("fam2");
   private static final Logger LOG = LoggerFactory.getLogger(CsvImport.class);
 
-//   static class ComputeWordLengthFn extends DoFn<String, Integer> {
-//   @ProcessElement
-//   public void processElement(@Element String word, OutputReceiver<Integer> out) {
-//     // Use OutputReceiver.output to emit the output element.
-//     out.output(word.length());
-//   }
-// }
-  static class MUTATION_TRANSFORM extends DoFn<String, Mutation> {
-  // static final DoFn<String, Mutation> MUTATION_TRANSFORM = new DoFn<String, Mutation>() {
+  // static class ComputeWordLengthFn extends DoFn<String, Integer> {
+  //   @ProcessElement
+  //   public void processElement(@Element String word, OutputReceiver<Integer> out) {
+  //     // Use OutputReceiver.output to emit the output element.
+  //     out.output(word.length());
+  //   }
+  // }
+
+  static final DoFn<String, Mutation> MUTATION_TRANSFORM = new DoFn<String, Mutation>() {
     @ProcessElement
-    public void processElement(@Element String line, OutputReceiver<Mutation> out, ProcessContext c) throws Exception {
-    // public void processElement(DoFn<String, Mutation>.ProcessContext c) throws Exception {
+    public void processElement(DoFn<String, Mutation>.ProcessContext c) throws Exception {
+      // @Element String word, OutputReceiver<Integer> out
       try {
         String[] headers = c.getPipelineOptions().as(BigtableCsvOptions.class).getHeaders()
             .split(",");
-        // String[] values = c.element().split(",");
-        String[] values = line.split(",");
+        String[] values = c.element().split(",");
         Preconditions.checkArgument(headers.length == values.length);
 
         // byte[] rowkey = Bytes.toBytes(values[0].toString() + values[1].toString());
@@ -100,7 +98,7 @@ public class CsvImport {
             row.addColumn(FAMILY_2, headerBytes[i], timestamp, Bytes.toBytes(values[i]));
           }
         }
-        out.output(row);
+        c.output(row);
       } catch (Exception e) {
         LOG.error("Failed to process input {}", c.element(), e);
         throw e;
@@ -112,18 +110,14 @@ public class CsvImport {
   public static interface BigtableCsvOptions extends CloudBigtableOptions {
 
     @Description("The headers for the CSV file.")
-    // String getHeaders();
-    @Validation.Required
-    ValueProvider<String> getHeaders();
+    String getHeaders();
 
-    void setHeaders(ValueProvider<String> headers);
+    void setHeaders(String headers);
 
     @Description("The Cloud Storage path to the CSV file.")
-    // String getInputFile();
-    @Validation.Required
-    ValueProvider<String> getInputFile();
+    String getInputFile();
 
-    void setInputFile(ValueProvider<String> location);
+    void setInputFile(String location);
   }
 
 
@@ -166,7 +160,7 @@ public class CsvImport {
     Pipeline p = Pipeline.create(options);
 
     p.apply("ReadMyFile", TextIO.read().from(options.getInputFile()))
-        .apply("TransformParsingsToBigtable", ParDo.of(new MUTATION_TRANSFORM()))
+        .apply("TransformParsingsToBigtable", ParDo.of(MUTATION_TRANSFORM))
         .apply("WriteToBigtable", CloudBigtableIO.writeToTable(config));
 
     p.run().waitUntilFinish();

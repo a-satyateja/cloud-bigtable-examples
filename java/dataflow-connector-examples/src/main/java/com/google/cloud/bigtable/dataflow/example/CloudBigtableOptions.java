@@ -6,18 +6,18 @@ import org.apache.beam.sdk.options.ValueProvider;
 
 public interface CloudBigtableOptions extends DataflowPipelineOptions {
   @Description("The Google Cloud project ID for the Cloud Bigtable instance.")
-  ValueProvider<String> getBigtableProjectId();
+  String getBigtableProjectId();
 
-  void setBigtableProjectId(ValueProvider<String> bigtableProjectId);
+  void setBigtableProjectId(String bigtableProjectId);
 
   @Description("The Google Cloud Bigtable instance ID .")
-  ValueProvider<String> getBigtableInstanceId();
+  String getBigtableInstanceId();
 
-  void setBigtableInstanceId(ValueProvider<String> bigtableInstanceId);
+  void setBigtableInstanceId(String bigtableInstanceId);
 
   @Description("The Cloud Bigtable table ID in the instance." )
-  ValueProvider<String> getBigtableTableId();
+  String getBigtableTableId();
 
-  void setBigtableTableId(ValueProvider<String> bigtableTableId);
+  void setBigtableTableId(String bigtableTableId);
 
 }
