@@ -113,14 +113,14 @@ public class CsvImport {
 
     @Description("The headers for the CSV file.")
     // String getHeaders();
-    // @Validation.Required
+    @Validation.Required
     ValueProvider<String> getHeaders();
 
     void setHeaders(ValueProvider<String> headers);
 
     @Description("The Cloud Storage path to the CSV file.")
     // String getInputFile();
-    // @Validation.Required
+    @Validation.Required
     ValueProvider<String> getInputFile();
 
     void setInputFile(ValueProvider<String> location);
@@ -165,9 +165,9 @@ public class CsvImport {
 
     Pipeline p = Pipeline.create(options);
 
-    p.apply("ReadMyFile", TextIO.read().from(options.getInputFile()).withoutValidation())
+    p.apply("ReadMyFile", TextIO.read().from(options.getInputFile()))
         .apply("TransformParsingsToBigtable", ParDo.of(new MUTATION_TRANSFORM()))
-        .apply("WriteToBigtable", CloudBigtableIO.writeToTable(config).withoutValidation());
+        .apply("WriteToBigtable", CloudBigtableIO.writeToTable(config));
 
     p.run().waitUntilFinish();
   }
