@@ -1,0 +1,11 @@
+{
+  "name": "csvimport",
+  "description": "An example pipeline that imports csv into bigtable.",
+  "parameters": [{
+    "name": "inputFile",
+    "label": "Input Cloud Storage File(s)",
+    "help_text": "Path of the file pattern glob to read from.",
+    "regexes": ["^gs:\/\/[^\n\r]+$"],
+    "is_optional": false
+  }]
+}
