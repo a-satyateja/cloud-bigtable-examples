@@ -124,7 +124,7 @@ public class CsvImport {
     //         .withTableId(options.getBigtableTableId());
 
     CloudBigtableTableConfiguration config = new CloudBigtableTableConfiguration.Builder()
-                                              .withProjectId("dataninja")
+                                              .withProjectId("gcp-accelerators")
                                               .withInstanceId("dataninja-bt")
                                               .withTableId("my-table")
                                               .build();
